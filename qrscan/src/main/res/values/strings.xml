@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">QRScan</string>
+
+    <string name="scan_qr_top">手机靠近并按车锁按钮也能租车</string>
+    <string name="scan_qr_bottom">将二维码放入框内，即可自动扫描</string>
+
+    <string name="scan_card">请将银行卡置于此区域，并对齐扫描框边缘</string>
+
+</resources>
