@@ -1,26 +1,24 @@
-package com.hawk.qrscan.decoding.qrcode
+package com.hawk.qrscan.decoding.card
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Message
 import android.util.Log
-import com.google.zxing.Result
 import com.hawk.qrscan.R
 import com.hawk.qrscan.camera.CameraManager
-import com.hawk.qrscan.interfaces.QRViewController
-import com.hawk.qrscan.view.QRPointCallback
-
+import com.hawk.qrscan.interfaces.CardViewController
 
 /**
  * Created by heyong on 2018/3/6.
  */
-class QRHandler(private val controller: QRViewController) : Handler() {
+class CardHandler(context: Context, private val controller: CardViewController) : Handler() {
 
     companion object {
-        private val TAG = QRHandler::class.java.simpleName
+        private val TAG = CardHandler::class.java.simpleName
     }
 
-    private val decodeThread: DecodeThread = DecodeThread(controller, QRPointCallback(controller.getQRPreview()))
+    private val decodeThread: DecodeThread = DecodeThread(context, controller)
     private var state: State? = null
 
     private enum class State {
@@ -54,10 +52,10 @@ class QRHandler(private val controller: QRViewController) : Handler() {
                 var barcode: Bitmap? = null
 
                 if (bundle != null) {
-                    barcode = bundle.getParcelable(DecodeThread.BARCODE_BITMAP)
+                    barcode = bundle.getParcelable(DecodeThread.CARD_BITMAP)
                 }
 
-                controller.handleDecode(message.obj as Result, barcode)
+                controller.handleDecode(message.obj as String, barcode)
             }
             R.id.decode_failed -> {
                 // We're decoding as fast as possible, so when one decode fails, start another.
@@ -97,6 +95,5 @@ class QRHandler(private val controller: QRViewController) : Handler() {
             controller.drawView()
         }
     }
-
 
 }

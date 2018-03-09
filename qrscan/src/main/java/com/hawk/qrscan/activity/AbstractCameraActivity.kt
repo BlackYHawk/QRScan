@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Vibrator
 import android.support.v7.app.AppCompatActivity
 import android.view.SurfaceHolder
-import android.view.SurfaceView
 import com.hawk.qrscan.R
 import com.hawk.qrscan.camera.CameraManager
 import com.hawk.qrscan.decoding.InactivityTimer
@@ -16,7 +15,7 @@ import java.io.IOException
 /**
  * Created by heyong on 2018/3/6.
  */
-abstract class AbstractCameraActivity : AppCompatActivity(), SurfaceHolder.Callback {
+abstract class AbstractCameraActivity : AppCompatActivity() {
     companion object {
         private val VIBRATE_DURATION = 200L
         private val BEEP_VOLUME = 0.10f
@@ -24,7 +23,6 @@ abstract class AbstractCameraActivity : AppCompatActivity(), SurfaceHolder.Callb
 
     protected var inactivityTimer: InactivityTimer? = null
     private var mediaPlayer: MediaPlayer? = null
-    private var hasSurface: Boolean = false
     private var playBeep: Boolean = false
     private var vibrate: Boolean = false
     private var flashlight = false
@@ -35,9 +33,10 @@ abstract class AbstractCameraActivity : AppCompatActivity(), SurfaceHolder.Callb
         inactivityTimer = InactivityTimer(this);
     }
 
-    private fun openCamera(surfaceHolder: SurfaceHolder) {
+    protected open fun openCamera(surfaceHolder: SurfaceHolder) {
         try {
             CameraManager.get()?.openDriver(surfaceHolder)
+            CameraManager.get()?.startPreview()
         } catch (ioe: IOException) {
             return
         } catch (e: RuntimeException) {
@@ -45,7 +44,7 @@ abstract class AbstractCameraActivity : AppCompatActivity(), SurfaceHolder.Callb
         }
     }
 
-    private fun closeCamera() {
+    protected fun closeCamera() {
         try {
             CameraManager.get()?.closeDriver()
         } catch (ioe: IOException) {
@@ -92,32 +91,8 @@ abstract class AbstractCameraActivity : AppCompatActivity(), SurfaceHolder.Callb
         }
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder?) {
-        if (!hasSurface) {
-            hasSurface = true;
-            openCamera(holder!!);
-        }
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        hasSurface = false
-    }
-
     override fun onResume() {
         super.onResume()
-        val preview: SurfaceView = findViewById(R.id.previewView)
-        val surfaceHolder = preview.holder
-
-        if (hasSurface) {
-            openCamera(surfaceHolder)
-        } else {
-            surfaceHolder.addCallback(this)
-            surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
-        }
-
         playBeep = true
         val audioService = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (audioService.ringerMode != AudioManager.RINGER_MODE_NORMAL) {
@@ -125,11 +100,6 @@ abstract class AbstractCameraActivity : AppCompatActivity(), SurfaceHolder.Callb
         }
         initBeepSound()
         vibrate = true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        closeCamera()
     }
 
     override fun onDestroy() {

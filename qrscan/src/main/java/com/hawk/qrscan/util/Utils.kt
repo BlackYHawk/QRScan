@@ -10,6 +10,10 @@ import android.content.Context
 class Utils {
 
     companion object {
+
+        val Extra_Code = "Extra_Code"
+        val Extra_Bitmap = "Extra_Bitmap"
+
         /**
          * 计算相对应的长度
          * @param dip

@@ -19,13 +19,16 @@ import java.util.concurrent.CountDownLatch
  */
 internal class DecodeThread(private val controller: QRViewController,
                             resultPointCallback: ResultPointCallback) : Thread() {
-    private val hints: Hashtable<DecodeHintType, Any>
+
+    companion object {
+        val BARCODE_BITMAP = "barcode_bitmap"
+    }
+
+    private val hints: Hashtable<DecodeHintType, Any> = Hashtable<DecodeHintType, Any>(3)
     private var handler: Handler? = null
-    private val handlerInitLatch: CountDownLatch
+    private val handlerInitLatch: CountDownLatch = CountDownLatch(1)
 
     init {
-        handlerInitLatch = CountDownLatch(1)
-        hints = Hashtable<DecodeHintType, Any>(3)
         val decodeFormats = Vector<BarcodeFormat>()
 
         decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS!!)
@@ -51,11 +54,6 @@ internal class DecodeThread(private val controller: QRViewController,
         handler = DecodeHandler(controller, hints)
         handlerInitLatch.countDown()
         Looper.loop()
-    }
-
-    companion object {
-
-        val BARCODE_BITMAP = "barcode_bitmap"
     }
 
 }

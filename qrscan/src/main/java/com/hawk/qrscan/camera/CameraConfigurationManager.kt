@@ -64,7 +64,7 @@ class CameraConfigurationManager constructor(val context : Context) {
         //setSharpness(parameters);
         //modify here
 
-//    camera.setDisplayOrientation(90);
+       // camera.setDisplayOrientation(90);
         //兼容2.1
         setDisplayOrientation(camera, 90);
         camera.setParameters(parameters);

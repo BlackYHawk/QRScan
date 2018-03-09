@@ -241,7 +241,7 @@ class CameraManager {
                 return null
             }
             val width = widthPixels * 7 / 8
-            val height = width * 2 / 3
+            val height = (width * 0.63).toInt()
             val leftOffset = (screenResolution.x - width) / 2
             val topOffset = (screenResolution.y - width) / 2 - Utils.convertDip2Pixel(context!!, 50)
             framingRect = Rect(leftOffset, topOffset, leftOffset + width, topOffset + height)
@@ -254,9 +254,15 @@ class CameraManager {
      * Like [.getQRFramingRect] but coordinates are in terms of the preview frame,
      * not UI / screen.
      */
-    fun getFramingRectInPreview(): Rect? {
+    fun getFramingRectInPreview(type: Int): Rect? {
         if (framingRectInPreview == null) {
-            val rect = Rect(getQRFramingRect())
+            val rect: Rect?
+
+            if (type == 0) {
+                rect = Rect(getQRFramingRect())
+            } else{
+                rect = Rect(getCardFramingRect())
+            }
             val cameraResolution = configManager?.getCameraResolution()
             val screenResolution = configManager?.getScreenResolution()
 
@@ -281,7 +287,7 @@ class CameraManager {
      * @return A PlanarYUVLuminanceSource instance.
      */
     fun buildLuminanceSource(data: ByteArray, width: Int, height: Int): PlanarYUVLuminanceSource {
-        val rect = getFramingRectInPreview()
+        val rect = getFramingRectInPreview(0)
         val previewFormat = configManager?.getPreviewFormat()
         val previewFormatString = configManager?.getPreviewFormatString()
 
