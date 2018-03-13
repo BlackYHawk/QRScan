@@ -8,6 +8,8 @@ import android.os.Handler
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.View
+import android.widget.ImageView
 import com.hawk.qrscan.R
 import com.hawk.qrscan.decoding.card.CardHandler
 import com.hawk.qrscan.interfaces.CardViewController
@@ -18,10 +20,12 @@ import com.hawk.qrscan.view.CardPreview
 /**
  * Created by heyong on 2018/3/8.
  */
-class CardPreviewActivity : AbstractCameraActivity(), SurfaceHolder.Callback, CardViewController {
+class CardPreviewActivity : AbstractCameraActivity(), SurfaceHolder.Callback, View.OnClickListener,
+        CardViewController {
     private var handler: CardHandler? = null
     private var preview: SurfaceView? = null
     private var cardPreview: CardPreview? = null
+    private var ivFlashlight: ImageView? = null
     private var surfaceHolder: SurfaceHolder? = null
     private var hasSurface: Boolean = false
 
@@ -30,7 +34,10 @@ class CardPreviewActivity : AbstractCameraActivity(), SurfaceHolder.Callback, Ca
         setContentView(R.layout.layout_card)
         preview = findViewById(R.id.previewView)
         cardPreview = findViewById(R.id.cardPreview)
+        ivFlashlight = findViewById(R.id.ivFlashlight)
+
         surfaceHolder = preview?.holder
+        ivFlashlight?.setOnClickListener(this)
 
         handler = CardHandler(this, this)
         surfaceHolder?.addCallback(this)
@@ -38,7 +45,7 @@ class CardPreviewActivity : AbstractCameraActivity(), SurfaceHolder.Callback, Ca
     }
 
     override fun handleDecode(result: String, barcode: Bitmap?) {
-        Log.i("sean3", "^^^^^^^@" + result)
+        Log.i("sean3", "^^^^^^^@")
         inactivityTimer?.onActivity()
         playBeepSoundAndVibrate()
 
@@ -64,6 +71,19 @@ class CardPreviewActivity : AbstractCameraActivity(), SurfaceHolder.Callback, Ca
     override fun openCamera(surfaceHolder: SurfaceHolder) {
         super.openCamera(surfaceHolder)
         handler?.restartPreviewAndDecode()
+    }
+
+    override fun turnOnFlash(on: Boolean) {
+        super.turnOnFlash(on)
+        ivFlashlight?.isSelected = on
+    }
+
+    override fun onClick(v: View?) {
+        when(v!!.id) {
+            R.id.ivFlashlight -> {
+                turnOnFlash(!flashlight)
+            }
+        }
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {

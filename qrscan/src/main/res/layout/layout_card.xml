@@ -16,4 +16,13 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
 
+    <ImageView
+        android:id="@+id/ivFlashlight"
+        android:layout_width="@dimen/card_width"
+        android:layout_height="@dimen/card_width"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/card_margin_b"
+        android:background="@drawable/drawable_flashlight"/>
+
 </RelativeLayout>

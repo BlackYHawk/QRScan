@@ -48,7 +48,7 @@ class CardHandler(context: Context, private val controller: CardViewController) 
             R.id.decode_succeeded -> {
                 Log.d(TAG, "Got decode succeeded message")
                 state = State.SUCCESS
-                val bundle = message.getData()
+                val bundle = message.data
                 var barcode: Bitmap? = null
 
                 if (bundle != null) {

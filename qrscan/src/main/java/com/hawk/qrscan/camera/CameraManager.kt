@@ -46,8 +46,10 @@ class CameraManager {
     private var context: Context? = null
     private var configManager: CameraConfigurationManager? = null
     private var camera: Camera? = null
-    private var framingRect: Rect? = null
-    private var framingRectInPreview: Rect? = null
+    private var framingQRRect: Rect? = null
+    private var framingQRRectInPreview: Rect? = null
+    private var framingCardRect: Rect? = null
+    private var framingCardRectInPreview: Rect? = null
     private var initialized: Boolean = false
     private var previewing: Boolean = false
     private var useOneShotPreviewCallback: Boolean = false
@@ -213,17 +215,17 @@ class CameraManager {
     fun getQRFramingRect(): Rect? {
         val screenResolution = configManager?.getScreenResolution()
 
-        if (framingRect == null && screenResolution != null) {
+        if (framingQRRect == null && screenResolution != null) {
             if (camera == null) {
                 return null
             }
             val width = widthPixels * 2 / 3
             val leftOffset = (screenResolution.x - width) / 2
             val topOffset = (screenResolution.y - width) / 2 - Utils.convertDip2Pixel(context!!, 50)
-            framingRect = Rect(leftOffset, topOffset, leftOffset + width, topOffset + width)
-            Log.d(TAG, "Calculated framing rect: " + framingRect)
+            framingQRRect = Rect(leftOffset, topOffset, leftOffset + width, topOffset + width)
+            Log.d(TAG, "Calculated framing rect: " + framingQRRect)
         }
-        return framingRect
+        return framingQRRect
     }
 
     /**
@@ -236,33 +238,48 @@ class CameraManager {
     fun getCardFramingRect(): Rect? {
         val screenResolution = configManager?.getScreenResolution()
 
-        if (framingRect == null && screenResolution != null) {
+        if (framingCardRect == null && screenResolution != null) {
             if (camera == null) {
                 return null
             }
             val width = widthPixels * 7 / 8
-            val height = (width * 0.63).toInt()
+            val height = (width * 0.58).toInt()
             val leftOffset = (screenResolution.x - width) / 2
             val topOffset = (screenResolution.y - width) / 2 - Utils.convertDip2Pixel(context!!, 50)
-            framingRect = Rect(leftOffset, topOffset, leftOffset + width, topOffset + height)
-            Log.d(TAG, "Calculated framing rect: " + framingRect)
+            framingCardRect = Rect(leftOffset, topOffset, leftOffset + width, topOffset + height)
+            Log.d(TAG, "Calculated framing rect: " + framingCardRect)
         }
-        return framingRect
+        return framingCardRect
+    }
+
+    /**
+     * Like [.getCardFramingRect] but coordinates are in terms of the preview frame, not UI / screen.
+     */
+    fun getCardFramingRectInPreview(): Rect? {
+        if (framingCardRectInPreview == null) {
+            val rect = Rect(getCardFramingRect())
+            val cameraResolution = configManager?.getCameraResolution()
+            val screenResolution = configManager?.getScreenResolution()
+            val offset = Utils.convertDip2Pixel(context!!, 20)
+
+            if (cameraResolution != null && screenResolution != null) {
+                rect.left = rect.left * cameraResolution.y / screenResolution.x
+                rect.right = rect.right * cameraResolution.y / screenResolution.x
+                rect.top = rect.top * cameraResolution.x / screenResolution.y + offset
+                rect.bottom = rect.bottom * cameraResolution.x / screenResolution.y + offset
+                framingCardRectInPreview = rect
+            }
+        }
+        return framingCardRectInPreview
     }
 
     /**
      * Like [.getQRFramingRect] but coordinates are in terms of the preview frame,
      * not UI / screen.
      */
-    fun getFramingRectInPreview(type: Int): Rect? {
-        if (framingRectInPreview == null) {
-            val rect: Rect?
-
-            if (type == 0) {
-                rect = Rect(getQRFramingRect())
-            } else{
-                rect = Rect(getCardFramingRect())
-            }
+    private fun getFramingRectInPreview(): Rect? {
+        if (framingQRRectInPreview == null) {
+            val rect = Rect(getQRFramingRect())
             val cameraResolution = configManager?.getCameraResolution()
             val screenResolution = configManager?.getScreenResolution()
 
@@ -271,10 +288,10 @@ class CameraManager {
                 rect.right = rect.right * cameraResolution.y / screenResolution.x
                 rect.top = rect.top * cameraResolution.x / screenResolution.y
                 rect.bottom = rect.bottom * cameraResolution.x / screenResolution.y
-                framingRectInPreview = rect
+                framingQRRectInPreview = rect
             }
         }
-        return framingRectInPreview
+        return framingQRRectInPreview
     }
 
     /**
@@ -287,7 +304,7 @@ class CameraManager {
      * @return A PlanarYUVLuminanceSource instance.
      */
     fun buildLuminanceSource(data: ByteArray, width: Int, height: Int): PlanarYUVLuminanceSource {
-        val rect = getFramingRectInPreview(0)
+        val rect = getFramingRectInPreview()
         val previewFormat = configManager?.getPreviewFormat()
         val previewFormatString = configManager?.getPreviewFormatString()
 

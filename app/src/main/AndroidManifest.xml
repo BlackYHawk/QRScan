@@ -17,12 +17,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.hawk.qrscan.activity.QRPreviewActivity" >
-
-        </activity>
-        <activity android:name="com.hawk.qrscan.activity.CardPreviewActivity" >
-
-        </activity>
     </application>
 
 </manifest>

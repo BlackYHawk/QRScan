@@ -9,11 +9,9 @@ import android.util.Log
 import com.googlecode.tesseract.android.TessBaseAPI
 import com.hawk.qrscan.R
 import com.hawk.qrscan.camera.CameraManager
-import com.hawk.qrscan.decoding.qrcode.DecodeThread
 import com.hawk.qrscan.interfaces.CardViewController
+import com.hawk.qrscan.util.IdcardUtils
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 
 
 /**
@@ -29,11 +27,10 @@ internal class DecodeHandler(private val controller: CardViewController, private
     private var baseApi: TessBaseAPI? = null
 
     init {
-        baseApi = TessBaseAPI()
-        baseApi!!.init(sdPath, "eng")
-        baseApi!!.setVariable("tessedit_char_whitelist", "0123456789Xx")
         try {
-
+            baseApi = TessBaseAPI()
+            baseApi!!.init(sdPath, "eng")
+            baseApi!!.setVariable("tessedit_char_whitelist", "0123456789Xx")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -79,11 +76,10 @@ internal class DecodeHandler(private val controller: CardViewController, private
         bitmap = Bitmap.createBitmap(bitmapOrigin, 0, 0, bitmapOrigin.width, bitmapOrigin.height, matrix, true)
 
         if (bitmap == null) {
-            Log.d("zka", "bitmap is nlll");
             return;
         }
         else {
-            val rect = CameraManager.get()?.getFramingRectInPreview(1) ?: return
+            val rect = CameraManager.get()?.getCardFramingRectInPreview() ?: return
 
             val bitmapWidth = rect.right - rect.left
             val bitmapHeight = rect.bottom - rect.top
@@ -97,20 +93,14 @@ internal class DecodeHandler(private val controller: CardViewController, private
             val bit_hm = Bitmap.createBitmap(bitmap1, x, y, w, h)
             val id = doOcr(bit_hm)
 
-            if (id != null && id.length == 18) {
+            if (id != null && IdcardUtils.validateCard(id)) {
                 val end = System.currentTimeMillis()
                 Log.d(TAG, "Found card (" + (end - start) + " ms):\n" + id)
-                saveBitmap(bitmapOrigin, sdPath, "test0");
-                saveBitmap(bitmap, sdPath, "test1");
-                saveBitmap(bitmap1, sdPath, "test2");
-                saveBitmap(bit_hm, sdPath, "test3");
-
 
                 val message = Message.obtain(controller.getHandler(), R.id.decode_succeeded, id)
                 val bundle = Bundle()
-                bundle.putParcelable(DecodeThread.BARCODE_BITMAP, bitmap1)
-                message.setData(bundle)
-                //Log.d(TAG, "Sending decode succeeded message...");
+                bundle.putParcelable(DecodeThread.CARD_BITMAP, bitmap1)
+                message.data = bundle
                 message.sendToTarget()
             }
             else {
@@ -118,6 +108,7 @@ internal class DecodeHandler(private val controller: CardViewController, private
                 message.sendToTarget()
             }
 
+            bitmapOrigin.recycle()
             bitmap.recycle()
             bit_hm.recycle()
         }
@@ -133,31 +124,4 @@ internal class DecodeHandler(private val controller: CardViewController, private
         return text
     }
 
-    /**
-     * 保存图片
-     *
-     * @param bm
-     * @param dir
-     * @param picName
-     */
-    fun saveBitmap(bm: Bitmap, dir: String, picName: String): Boolean {
-        try {
-            val file = File(dir, picName)
-
-            if (file == null) {
-                Log.e("test", "创建图片文件失败")
-                return false
-            }
-            val out = FileOutputStream(file)
-            bm.compress(Bitmap.CompressFormat.JPEG, 90, out)
-            out.flush()
-            out.close()
-            Log.e("test", "保存图片文件成功")
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        return false
-    }
 }

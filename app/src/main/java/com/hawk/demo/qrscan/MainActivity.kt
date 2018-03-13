@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -50,11 +51,15 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK && data != null) {
             if (requestCode == CODE_SCAN) {
                 val code = data.getStringExtra(Utils.Extra_Code)
-                val bitmap = data.getParcelableExtra<Bitmap>(Utils.Extra_Bitmap)
+                var bitmap: Bitmap? = null
 
-                Log.i("test", "^^^^^^^@" + code)
+                if (data.hasExtra(Utils.Extra_Bitmap)) {
+                    bitmap = data.getParcelableExtra(Utils.Extra_Bitmap)
+                }
+
+                Log.i("test", "^^^^^^^@" + code + "^^^^^^^@" + (bitmap == null))
                 if (bitmap != null) {
-                    imageView.setImageBitmap(bitmap)
+                    imageView.background = BitmapDrawable(resources, bitmap)
                 }
             }
         }

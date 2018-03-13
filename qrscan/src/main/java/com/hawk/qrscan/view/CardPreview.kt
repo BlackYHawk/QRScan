@@ -153,7 +153,6 @@ class CardPreview constructor(context: Context, attrs: AttributeSet) : View(cont
         paint?.setTextSize(DefaultBottomTextSize * density)
         paint?.setAlpha(0x5a)
         paint?.setTypeface(Typeface.create("System", Typeface.BOLD))
-        //            mCanvas.drawText(getResources().getString(R.string.scan_text), frame.left, (float) (frame.bottom + (float) DefaultTextPadding * density), paint);
         paint?.setTextAlign(Paint.Align.CENTER)
         canvas.drawText(bottomHint, (widthPixels / 2).toFloat(), frame.bottom + DefaultTextPadding.toFloat() * density, paint)
     }
