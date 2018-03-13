@@ -39,8 +39,8 @@ ext {
     artifactName = 'QRScan'
     artifactDescription = 'QRCode Or IDCard Scan.'
     artifactLabels = ['QRCode', 'IDCard', 'Tesseract']
-    releaseVersionCode = 1
-    releaseVersionName = '1.0.0'
+    releaseVersionCode = 2
+    releaseVersionName = '1.0.1'
 
     androidCompileSdkVersion = 26
     androidBuildToolsVersion = '26.0.2'
