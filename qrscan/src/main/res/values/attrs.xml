@@ -2,7 +2,8 @@
 <resources>
     <!-- Messages IDs -->
     <item name="auto_focus" type="id"/>
-    <item name="decode" type="id"/>
+    <item name="decodeFront" type="id"/>
+    <item name="decodeBack" type="id"/>
     <item name="decode_failed" type="id"/>
     <item name="decode_succeeded" type="id"/>
     <item name="launch_product_query" type="id"/>

@@ -15,7 +15,8 @@ import java.util.concurrent.CountDownLatch
  * This thread does all the heavy lifting of decoding the images.
  * 解码线程
  */
-internal class DecodeThread(context: Context, private val controller: CardViewController) : Thread() {
+internal class DecodeThread(context: Context, private val controller: CardViewController,
+                            private val front: Boolean) : Thread() {
 
     companion object {
         val CARD_BITMAP = "card_bitmap"
@@ -28,7 +29,12 @@ internal class DecodeThread(context: Context, private val controller: CardViewCo
 
     init {
         try {
-            copyAssetFile(context)
+            if (front) {
+                copyAssetFile(context, "eng.traineddata")
+            }
+            else {
+                copyAssetFile(context, "chi_sim.traineddata")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -46,15 +52,15 @@ internal class DecodeThread(context: Context, private val controller: CardViewCo
 
     override fun run() {
         Looper.prepare()
-        handler = DecodeHandler(controller, sdPath.toString())
+        handler = DecodeHandler(controller, sdPath, front)
         handlerInitLatch.countDown()
         Looper.loop()
     }
 
     @Throws(Exception::class)
-    private fun copyAssetFile(context: Context): Boolean {
+    private fun copyAssetFile(context: Context, fileName: String): Boolean {
         val dirName = "$sdPath/tessdata"
-        val filePath = "$sdPath/tessdata/eng.traineddata"
+        val filePath = "$sdPath/tessdata/$fileName"
         val dir = File(dirName)
 
         if (!dir.exists()) {
@@ -66,7 +72,7 @@ internal class DecodeThread(context: Context, private val controller: CardViewCo
         if (dataFile.exists()) {
             return true// 文件存在
         } else {
-            val stream = context.getAssets().open("eng.traineddata")
+            val stream = context.getAssets().open(fileName)
 
             val outFile = File(filePath)
 

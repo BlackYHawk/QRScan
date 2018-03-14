@@ -12,13 +12,13 @@ import com.hawk.qrscan.interfaces.CardViewController
 /**
  * Created by heyong on 2018/3/6.
  */
-class CardHandler(context: Context, private val controller: CardViewController) : Handler() {
+class CardHandler(context: Context, private val controller: CardViewController, private val front: Boolean) : Handler() {
 
     companion object {
         private val TAG = CardHandler::class.java.simpleName
     }
 
-    private val decodeThread: DecodeThread = DecodeThread(context, controller)
+    private val decodeThread: DecodeThread = DecodeThread(context, controller, front)
     private var state: State? = null
 
     private enum class State {
@@ -46,7 +46,7 @@ class CardHandler(context: Context, private val controller: CardViewController) 
                 restartPreviewAndDecode()
             }
             R.id.decode_succeeded -> {
-                Log.d(TAG, "Got decode succeeded message")
+                Log.d(TAG, "Got decodeFront succeeded message")
                 state = State.SUCCESS
                 val bundle = message.data
                 var barcode: Bitmap? = null
@@ -58,11 +58,15 @@ class CardHandler(context: Context, private val controller: CardViewController) 
                 controller.handleDecode(message.obj as String, barcode)
             }
             R.id.decode_failed -> {
-                // We're decoding as fast as possible, so when one decode fails, start another.
+                // We're decoding as fast as possible, so when one decodeFront fails, start another.
                 state = State.PREVIEW
 
                 if (decodeThread.getHandler() != null) {
-                    CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decode)
+                    if (front) {
+                        CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decodeFront)
+                    } else {
+                        CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decodeBack)
+                    }
                 }
             }
         }
@@ -89,7 +93,11 @@ class CardHandler(context: Context, private val controller: CardViewController) 
             state = State.PREVIEW
 
             if (decodeThread.getHandler() != null) {
-                CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decode)
+                if (front) {
+                    CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decodeFront)
+                } else {
+                    CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decodeBack)
+                }
             }
             CameraManager.get()?.requestAutoFocus(this, R.id.auto_focus)
             controller.drawView()

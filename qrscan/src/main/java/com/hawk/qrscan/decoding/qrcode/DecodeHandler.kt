@@ -31,8 +31,8 @@ internal class DecodeHandler(private val controller: QRViewController, hints: Ha
 
     override fun handleMessage(message: Message) {
         when (message.what) {
-            R.id.decode ->
-                //Log.d(TAG, "Got decode message");
+            R.id.decodeFront ->
+                //Log.d(TAG, "Got decodeFront message");
                 decode(message.obj as ByteArray, message.arg1, message.arg2)
             R.id.quit -> Looper.myLooper()!!.quit()
         }
@@ -40,7 +40,7 @@ internal class DecodeHandler(private val controller: QRViewController, hints: Ha
 
     /**
      * Decode the data within the viewfinder rectangle, and time how long it took. For efficiency,
-     * reuse the same reader objects from one decode to the next.
+     * reuse the same reader objects from one decodeFront to the next.
      *
      * @param data   The YUV preview frame.
      * @param width  The width of the preview frame.
@@ -80,7 +80,7 @@ internal class DecodeHandler(private val controller: QRViewController, hints: Ha
             val bundle = Bundle()
             bundle.putParcelable(DecodeThread.BARCODE_BITMAP, source?.renderCroppedGreyscaleBitmap())
             message.setData(bundle)
-            //Log.d(TAG, "Sending decode succeeded message...");
+            //Log.d(TAG, "Sending decodeFront succeeded message...");
             message.sendToTarget()
         } else {
             val message = Message.obtain(controller.getHandler(), R.id.decode_failed)

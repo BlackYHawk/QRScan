@@ -48,7 +48,7 @@ class QRHandler(private val controller: QRViewController) : Handler() {
                 restartPreviewAndDecode()
             }
             R.id.decode_succeeded -> {
-                Log.d(TAG, "Got decode succeeded message")
+                Log.d(TAG, "Got decodeFront succeeded message")
                 state = State.SUCCESS
                 val bundle = message.getData()
                 var barcode: Bitmap? = null
@@ -60,11 +60,11 @@ class QRHandler(private val controller: QRViewController) : Handler() {
                 controller.handleDecode(message.obj as Result, barcode)
             }
             R.id.decode_failed -> {
-                // We're decoding as fast as possible, so when one decode fails, start another.
+                // We're decoding as fast as possible, so when one decodeFront fails, start another.
                 state = State.PREVIEW
 
                 if (decodeThread.getHandler() != null) {
-                    CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decode)
+                    CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decodeFront)
                 }
             }
         }
@@ -91,7 +91,7 @@ class QRHandler(private val controller: QRViewController) : Handler() {
             state = State.PREVIEW
 
             if (decodeThread.getHandler() != null) {
-                CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decode)
+                CameraManager.get()?.requestPreviewFrame(decodeThread.getHandler()!!, R.id.decodeFront)
             }
             CameraManager.get()?.requestAutoFocus(this, R.id.auto_focus)
             controller.drawView()

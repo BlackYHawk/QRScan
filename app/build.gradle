@@ -4,6 +4,13 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+def getMyStoreFile(){
+    if("true".equals(IS_JENKINS)){
+        return file("android.jks")
+    }else{
+        return file("android.jks")
+    }
+}
 android {
     compileSdkVersion rootProject.ext.androidCompileSdkVersion
     buildToolsVersion rootProject.ext.androidBuildToolsVersion
@@ -14,13 +21,60 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.releaseVersionCode
         versionName rootProject.ext.releaseVersionName
+        flavorDimensions "versionCode"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        release {
+            storeFile getMyStoreFile()
+            storePassword "123456"
+            keyAlias "android.jks"
+            keyPassword "123456"
+        }
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
+    }
+    productFlavors {
+        baidu { }
+    }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [CHANNEL_VALUE: name]
+    }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            //新名字
+            def newName
+            //输出文件夹
+            def outDirectory
+
+            //是否为Jenkins打包，输出路径不同
+            if ("true".equals(IS_JENKINS)) {
+                //BUILD_PATH为服务器输出路径
+                outDirectory = BUILD_PATH
+                newName = "QRScan" + "-" + variant.versionName + "-" + BUILD_TYPE + ".apk"
+            } else {
+                newName = "QRScan" + "-" + variant.versionName + "-" + BUILD_TYPE + ".apk"
+            }
+            outputFileName = newName
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
     }
 }
 

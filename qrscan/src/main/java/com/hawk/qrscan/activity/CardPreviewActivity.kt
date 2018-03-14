@@ -39,7 +39,7 @@ class CardPreviewActivity : AbstractCameraActivity(), SurfaceHolder.Callback, Vi
         surfaceHolder = preview?.holder
         ivFlashlight?.setOnClickListener(this)
 
-        handler = CardHandler(this, this)
+        handler = CardHandler(this, this, false)
         surfaceHolder?.addCallback(this)
         surfaceHolder?.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
     }
