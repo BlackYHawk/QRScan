@@ -109,13 +109,13 @@ internal class DecodeHandler(private val controller: CardViewController, private
 
         if (bitmap != null) {
             val x = (bitmap.width * 0.29).toInt()
-            val y = (bitmap.height * 0.14).toInt()
-            val w = (bitmap.width * 0.57 + 0.5f).toInt()
+            val y = (bitmap.height * 0.10).toInt()
+            val w = (bitmap.width * 0.58 + 0.5f).toInt()
             val h = (bitmap.height * 0.37 + 0.5f).toInt()
             val bit_hm = Bitmap.createBitmap(bitmap, x, y, w, h)
             val id = doOcr(bit_hm)
 
-            if (id != null && id.contains("中华")) {
+            if (id != null && id.contains("中华人民")) {
                 saveBitmap(bit_hm, sdPath, start.toString());
                 val end = System.currentTimeMillis()
                 Log.d(TAG, "Found card (" + (end - start) + " ms):\n" + id)
